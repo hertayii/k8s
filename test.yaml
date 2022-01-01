@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: test
+  name: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: test
+    spec:
+      containers:
+      - name: data-script
+        image: bluewhale666/quotes-data-script:v4 
+        imagePullPolicy: Always
+        env:
+        - name: MYSQL_DB_HOST
+          value: "data"
+        - name: MYSQL_USER
+          value: "root"
+        - name: MYSQL_USER_PASSWORD
+          value: "root"
+      initContainers:
+      - name: init
+        image: bluewhale666/quotes-data-script:v3
+        command: ['sh', '-c', "until mysql -h ${MYSQL_DB_HOST} -u ${MYSQL_USER} -p${MYSQL_USER_PASSWORD} -e 'show databases;'; do echo waiting for mydb; sleep 2; done"]
+        env:
+        - name: MYSQL_DB_HOST
+          value: "data"
+        - name: MYSQL_USER
+          value: "root"
+        - name: MYSQL_USER_PASSWORD
+          value: "root"
